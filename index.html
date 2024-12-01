@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игра в Змейку</title>
+    <title>Игра Змейка</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="controls">
-        <button id="startBtn">Начать игру</button>
-        <button id="pauseBtn" style="display: none;">Пауза</button>
-        <button id="resumeBtn" style="display: none;">Продолжить</button>
-        <button id="restartBtn" style="display: none;">Перезапуск</button>
-    </div>
-    <div class="game-container" id="gameContainer">
-        <!-- Игровое поле будет создано через JS -->
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="600" height="400"></canvas>
+        <div id="controls">
+            <button id="startBtn">Начать игру</button>
+            <button id="pauseBtn" style="display:none;">Пауза</button>
+            <button id="resumeBtn" style="display:none;">Продолжить</button>
+            <button id="restartBtn" style="display:none;">Перезапуск</button>
+        </div>
+        <div id="score">Счет: 0</div>
     </div>
     <script src="script.js"></script>
 </body>
