@@ -43,7 +43,7 @@ function startGame() {
 
 // Function to change the snake's direction
 function changeDirection(event) {
-    if (isPaused) return;
+    if (isPaused || gameOver) return;
 
     if (event.key === 'ArrowUp' && direction.y === 0) {
         direction = { x: 0, y: -gridSize };
