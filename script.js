@@ -13,7 +13,7 @@ function startGame() {
     document.getElementById('startGame').disabled = true;
     document.getElementById('pauseGame').style.display = 'inline-block';
     document.getElementById('resumeGame').style.display = 'none';
-    gameInterval = setInterval(updateGame, 100);
+    gameInterval = setInterval(updateGame, 150); // Увеличена задержка для более плавного движения
 }
 
 function pauseGame() {
@@ -27,10 +27,12 @@ function resumeGame() {
     gameRunning = true;
     document.getElementById('pauseGame').style.display = 'inline-block';
     document.getElementById('resumeGame').style.display = 'none';
-    gameInterval = setInterval(updateGame, 100);
+    gameInterval = setInterval(updateGame, 150);
 }
 
 function updateGame() {
+    if (!gameRunning) return;
+
     const head = { ...snake[0] };
 
     switch (direction) {
@@ -54,8 +56,9 @@ function updateGame() {
         }
     }
 
-    snake.unshift(head);
-    snake.pop();
+    snake.unshift(head); // Добавляем новую голову
+    snake.pop(); // Удаляем хвост
+
     drawGame();
 }
 
