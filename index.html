@@ -1,23 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Game</title>
+    <title>Игра в Змейку</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="score-board">
-        <span id="score">Score: 0</span>
-        <span id="high-score">High Score: 0</span>
+    <div class="controls">
+        <button id="startBtn">Начать игру</button>
+        <button id="pauseBtn" style="display: none;">Пауза</button>
+        <button id="resumeBtn" style="display: none;">Продолжить</button>
+        <button id="restartBtn" style="display: none;">Перезапуск</button>
     </div>
-    <div id="game-container">
-        <div id="game-board"></div>
-    </div>
-    <div id="controls">
-        <button id="start-btn">Start Game</button>
-        <button id="pause-btn" disabled>Pause</button>
-        <button id="restart-btn" disabled>Restart</button>
+    <div class="game-container" id="gameContainer">
+        <!-- Игровое поле будет создано через JS -->
     </div>
     <script src="script.js"></script>
 </body>
