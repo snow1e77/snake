@@ -1,73 +1,79 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const gridSize = 20;
-let snake = [{ x: 10 * gridSize, y: 10 * gridSize }];
+// Инициализация переменных
+let canvas = document.getElementById('gameCanvas');
+let ctx = canvas.getContext('2d');
+let snake = [{ x: 150, y: 150 }];
+let food = { x: 100, y: 100 };
 let direction = 'RIGHT';
 let newDirection = 'RIGHT';
-let food = {};
 let gameInterval;
-let isPaused = false;
-let currentScore = 0;
-let highScore = 0;
+let gameRunning = false;
 
-// Устанавливаем начальное положение еды
-function placeFood() {
-    const x = Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize;
-    const y = Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize;
-    food = { x, y };
-}
+// Обработка нажатий клавиш для смены направления
+document.addEventListener('keydown', (e) => {
+    switch (e.key) {
+        case 'ArrowUp':
+            if (direction !== 'DOWN') newDirection = 'UP';
+            break;
+        case 'ArrowDown':
+            if (direction !== 'UP') newDirection = 'DOWN';
+            break;
+        case 'ArrowLeft':
+            if (direction !== 'RIGHT') newDirection = 'LEFT';
+            break;
+        case 'ArrowRight':
+            if (direction !== 'LEFT') newDirection = 'RIGHT';
+            break;
+    }
+});
 
-// Инициализация игры
+// Функция для начала игры
 function startGame() {
-    document.getElementById('startButton').style.display = 'none';
-    document.getElementById('pauseButton').style.display = 'inline-block';
-    document.getElementById('resumeButton').style.display = 'none';
-    placeFood();
-    direction = newDirection = 'RIGHT';
-    snake = [{ x: 10 * gridSize, y: 10 * gridSize }];
-    currentScore = 0;
-    document.getElementById('currentScore').innerText = `Текущий счёт: ${currentScore}`;
-    gameInterval = setInterval(updateGame, 100);
+    if (!gameRunning) {
+        gameRunning = true;
+        direction = newDirection;
+        gameInterval = setInterval(updateGame, 100);
+    }
 }
 
-// Обновление игры
+// Функция для обновления игры
 function updateGame() {
-    if (isPaused) return;
+    direction = newDirection;
+    let head = { ...snake[0] };
 
-    const head = { ...snake[0] };
-
-    switch (newDirection) {
-        case 'UP': head.y -= gridSize; break;
-        case 'DOWN': head.y += gridSize; break;
-        case 'LEFT': head.x -= gridSize; break;
-        case 'RIGHT': head.x += gridSize; break;
+    // Изменение позиции головы змейки в зависимости от направления
+    switch (direction) {
+        case 'UP':
+            head.y -= 20;
+            break;
+        case 'DOWN':
+            head.y += 20;
+            break;
+        case 'LEFT':
+            head.x -= 20;
+            break;
+        case 'RIGHT':
+            head.x += 20;
+            break;
     }
 
-    // Проверка на столкновение с границей (выход с противоположной стороны)
-    if (head.x < 0) head.x = canvas.width - gridSize;
+    // Проверка выхода за границы и возвращение с противоположной стороны
+    if (head.x < 0) head.x = canvas.width - 20;
+    if (head.y < 0) head.y = canvas.height - 20;
     if (head.x >= canvas.width) head.x = 0;
-    if (head.y < 0) head.y = canvas.height - gridSize;
     if (head.y >= canvas.height) head.y = 0;
 
-    // Проверка на столкновение с самим собой
-    for (let i = 1; i < snake.length; i++) {
-        if (snake[i].x === head.x && snake[i].y === head.y) {
-            gameOver();
-            return;
-        }
+    // Проверка столкновения с самим собой
+    if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+        gameOver();
+        return;
     }
 
+    // Добавление нового сегмента в змейку
     snake.unshift(head);
 
-    // Проверка на съедение еды
+    // Проверка, съела ли змейка еду
     if (head.x === food.x && head.y === food.y) {
-        currentScore++;
-        document.getElementById('currentScore').innerText = `Текущий счёт: ${currentScore}`;
-        placeFood();
-        if (currentScore > highScore) {
-            highScore = currentScore;
-            document.getElementById('highScore').innerText = `Лучший счёт: ${highScore}`;
-        }
+        placeNewFood();
     } else {
         snake.pop();
     }
@@ -75,49 +81,34 @@ function updateGame() {
     drawGame();
 }
 
-// Отображение игры
+// Функция для отрисовки игры
 function drawGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Рисуем змейку
+    // Отрисовка змейки
     ctx.fillStyle = 'green';
-    for (const segment of snake) {
-        ctx.fillRect(segment.x, segment.y, gridSize, gridSize);
-    }
+    snake.forEach(segment => {
+        ctx.fillRect(segment.x, segment.y, 20, 20);
+    });
 
-    // Рисуем еду
+    // Отрисовка еды
     ctx.fillStyle = 'red';
-    ctx.fillRect(food.x, food.y, gridSize, gridSize);
+    ctx.fillRect(food.x, food.y, 20, 20);
 }
 
-// Остановка игры
+// Функция для размещения еды в случайной позиции
+function placeNewFood() {
+    let x = Math.floor(Math.random() * (canvas.width / 20)) * 20;
+    let y = Math.floor(Math.random() * (canvas.height / 20)) * 20;
+    food = { x, y };
+}
+
+// Функция окончания игры
 function gameOver() {
     clearInterval(gameInterval);
-    alert('Игра окончена! Нажмите "Начать игру" для нового начала.');
-    startGame();
+    gameRunning = false;
+    alert('Игра окончена! Ваш результат: ' + snake.length);
 }
 
-// Обработка нажатий клавиш для смены направления
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowUp' && direction !== 'DOWN') newDirection = 'UP';
-    if (e.key === 'ArrowDown' && direction !== 'UP') newDirection = 'DOWN';
-    if (e.key === 'ArrowLeft' && direction !== 'RIGHT') newDirection = 'LEFT';
-    if (e.key === 'ArrowRight' && direction !== 'LEFT') newDirection = 'RIGHT';
-});
-
-// Кнопка паузы
-document.getElementById('pauseButton').addEventListener('click', () => {
-    isPaused = true;
-    document.getElementById('pauseButton').style.display = 'none';
-    document.getElementById('resumeButton').style.display = 'inline-block';
-});
-
-// Кнопка продолжения
-document.getElementById('resumeButton').addEventListener('click', () => {
-    isPaused = false;
-    document.getElementById('pauseButton').style.display = 'inline-block';
-    document.getElementById('resumeButton').style.display = 'none';
-});
-
-// Кнопка начала игры
+// Запуск игры при нажатии кнопки
 document.getElementById('startButton').addEventListener('click', startGame);
