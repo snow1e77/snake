@@ -11,16 +11,40 @@ let food = { x: 0, y: 0 };
 let direction = { x: gridSize, y: 0 }; // Initial movement to the right
 let gameInterval;
 let gameOver = false;
+let isPaused = false;
+
+// Button references
+const startBtn = document.getElementById('startBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const resumeBtn = document.getElementById('resumeBtn');
+
+// Event listeners for buttons
+startBtn.addEventListener('click', startGame);
+pauseBtn.addEventListener('click', pauseGame);
+resumeBtn.addEventListener('click', resumeGame);
 
 // Function to start the game
 function startGame() {
-    document.addEventListener('keydown', changeDirection);
+    if (gameInterval) clearInterval(gameInterval);
+    snake = [
+        { x: 160, y: 160 },
+        { x: 140, y: 160 },
+        { x: 120, y: 160 }
+    ];
+    direction = { x: gridSize, y: 0 };
+    gameOver = false;
+    isPaused = false;
     generateFood();
-    gameInterval = setInterval(update, 150); // Adjust speed here (lower value = faster)
+    gameInterval = setInterval(update, 150);
+    document.addEventListener('keydown', changeDirection);
+    startBtn.disabled = true;
+    pauseBtn.disabled = false;
 }
 
 // Function to change the snake's direction
 function changeDirection(event) {
+    if (isPaused) return;
+
     if (event.key === 'ArrowUp' && direction.y === 0) {
         direction = { x: 0, y: -gridSize };
     } else if (event.key === 'ArrowDown' && direction.y === 0) {
@@ -32,9 +56,29 @@ function changeDirection(event) {
     }
 }
 
+// Function to pause the game
+function pauseGame() {
+    if (!isPaused) {
+        clearInterval(gameInterval);
+        isPaused = true;
+        pauseBtn.disabled = true;
+        resumeBtn.disabled = false;
+    }
+}
+
+// Function to resume the game
+function resumeGame() {
+    if (isPaused) {
+        gameInterval = setInterval(update, 150);
+        isPaused = false;
+        pauseBtn.disabled = false;
+        resumeBtn.disabled = true;
+    }
+}
+
 // Function to update the game state
 function update() {
-    if (gameOver) return;
+    if (gameOver || isPaused) return;
 
     // Move the snake
     const newHead = {
@@ -42,11 +86,11 @@ function update() {
         y: snake[0].y + direction.y
     };
 
-    // Check for collisions with the walls
-    if (newHead.x < 0 || newHead.x >= canvas.width || newHead.y < 0 || newHead.y >= canvas.height) {
-        endGame();
-        return;
-    }
+    // Check for collisions with the walls (wrap around)
+    if (newHead.x < 0) newHead.x = canvas.width - gridSize;
+    if (newHead.x >= canvas.width) newHead.x = 0;
+    if (newHead.y < 0) newHead.y = canvas.height - gridSize;
+    if (newHead.y >= canvas.height) newHead.y = 0;
 
     // Check for collisions with itself
     if (snake.some(segment => segment.x === newHead.x && segment.y === newHead.y)) {
@@ -99,7 +143,5 @@ function endGame() {
     context.fillStyle = 'black';
     context.font = '30px Arial';
     context.fillText('Game Over!', canvas.width / 2 - 70, canvas.height / 2);
+    startBtn.disabled = false;
 }
-
-// Start the game
-startGame();
