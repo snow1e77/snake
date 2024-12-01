@@ -5,11 +5,18 @@ let snake = [{ x: 160, y: 160 }];
 let snakeDirection = 'right';
 let gameInterval;
 let isPaused = false;
+let score = 0;
 
 // Инициализация игры
 function startGame() {
     if (gameInterval) clearInterval(gameInterval);
+    score = 0;
+    document.getElementById('score').innerText = `Счет: ${score}`;
+    snake = [{ x: 160, y: 160 }];
+    snakeDirection = 'right';
     gameInterval = setInterval(updateGame, 100);
+    document.getElementById('startButton').style.display = 'none';
+    document.getElementById('pauseButton').style.display = 'inline-block';
 }
 
 // Основная функция обновления игры
@@ -23,6 +30,9 @@ function updateGame() {
     if (checkCollision()) {
         alert('Игра окончена!');
         clearInterval(gameInterval);
+        document.getElementById('startButton').style.display = 'inline-block';
+        document.getElementById('pauseButton').style.display = 'none';
+        document.getElementById('resumeButton').style.display = 'none';
         return;
     }
 
@@ -71,6 +81,8 @@ function drawGame() {
 }
 
 // Управление кнопками
+document.getElementById('startButton').addEventListener('click', startGame);
+
 document.getElementById('pauseButton').addEventListener('click', () => {
     isPaused = true;
     document.getElementById('pauseButton').style.display = 'none';
@@ -83,5 +95,20 @@ document.getElementById('resumeButton').addEventListener('click', () => {
     document.getElementById('pauseButton').style.display = 'inline-block';
 });
 
-// Старт игры при загрузке
-startGame();
+// Управление клавишами для направления змейки
+document.addEventListener('keydown', (event) => {
+    switch (event.key) {
+        case 'ArrowUp':
+            if (snakeDirection !== 'down') snakeDirection = 'up';
+            break;
+        case 'ArrowDown':
+            if (snakeDirection !== 'up') snakeDirection = 'down';
+            break;
+        case 'ArrowLeft':
+            if (snakeDirection !== 'right') snakeDirection = 'left';
+            break;
+        case 'ArrowRight':
+            if (snakeDirection !== 'left') snakeDirection = 'right';
+            break;
+    }
+});
