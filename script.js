@@ -1,98 +1,112 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-const gridSize = 20;
-let snake = [{ x: 160, y: 160 }];
-let direction = 'right';
+const tileSize = 20;
+let snake = [{ x: 100, y: 100 }];
+let direction = 'RIGHT';
+let food = { x: 160, y: 160 };
 let gameInterval;
-let gameRunning = false;
+let isPaused = false;
 
 function startGame() {
-    snake = [{ x: 160, y: 160 }];
-    direction = 'right';
-    gameRunning = true;
-    document.getElementById('startGame').disabled = true;
-    document.getElementById('pauseGame').style.display = 'inline-block';
+    document.getElementById('startGame').style.display = 'none';
+    document.getElementById('pauseGame').style.display = 'inline';
     document.getElementById('resumeGame').style.display = 'none';
-    gameInterval = setInterval(updateGame, 150); // Увеличена задержка для более плавного движения
+
+    gameInterval = setInterval(updateGame, 150);
 }
 
 function pauseGame() {
-    clearInterval(gameInterval);
-    gameRunning = false;
+    isPaused = true;
     document.getElementById('pauseGame').style.display = 'none';
-    document.getElementById('resumeGame').style.display = 'inline-block';
+    document.getElementById('resumeGame').style.display = 'inline';
+    clearInterval(gameInterval);
 }
 
 function resumeGame() {
-    gameRunning = true;
-    document.getElementById('pauseGame').style.display = 'inline-block';
+    isPaused = false;
+    document.getElementById('pauseGame').style.display = 'inline';
     document.getElementById('resumeGame').style.display = 'none';
     gameInterval = setInterval(updateGame, 150);
 }
 
 function updateGame() {
-    if (!gameRunning) return;
+    if (isPaused) return;
 
-    const head = { ...snake[0] };
+    moveSnake();
+    checkCollision();
+    checkFood();
+    drawGame();
+}
 
-    switch (direction) {
-        case 'up': head.y -= gridSize; break;
-        case 'down': head.y += gridSize; break;
-        case 'left': head.x -= gridSize; break;
-        case 'right': head.x += gridSize; break;
-    }
+function moveSnake() {
+    let head = { ...snake[0] };
 
-    // Проверка выхода за границы и "выход" на противоположную сторону
-    if (head.x < 0) head.x = canvas.width - gridSize;
+    if (direction === 'UP') head.y -= tileSize;
+    if (direction === 'DOWN') head.y += tileSize;
+    if (direction === 'LEFT') head.x -= tileSize;
+    if (direction === 'RIGHT') head.x += tileSize;
+
+    // Wrap around the edges
+    if (head.x < 0) head.x = canvas.width - tileSize;
     if (head.x >= canvas.width) head.x = 0;
-    if (head.y < 0) head.y = canvas.height - gridSize;
+    if (head.y < 0) head.y = canvas.height - tileSize;
     if (head.y >= canvas.height) head.y = 0;
 
-    // Проверка на столкновение с телом змейки
+    snake.unshift(head);
+    snake.pop();
+}
+
+function checkCollision() {
+    const head = snake[0];
+
+    // Check if the head collides with itself
     for (let i = 1; i < snake.length; i++) {
         if (head.x === snake[i].x && head.y === snake[i].y) {
-            gameOver();
+            endGame();
             return;
         }
     }
+}
 
-    snake.unshift(head); // Добавляем новую голову
-    snake.pop(); // Удаляем хвост
+function checkFood() {
+    const head = snake[0];
+    if (head.x === food.x && head.y === food.y) {
+        // Grow the snake
+        snake.push({ ...snake[snake.length - 1] });
+        placeFood();
+    }
+}
 
-    drawGame();
+function placeFood() {
+    food.x = Math.floor(Math.random() * (canvas.width / tileSize)) * tileSize;
+    food.y = Math.floor(Math.random() * (canvas.height / tileSize)) * tileSize;
 }
 
 function drawGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw the snake
     ctx.fillStyle = 'green';
-    snake.forEach(segment => {
-        ctx.fillRect(segment.x, segment.y, gridSize, gridSize);
-    });
+    for (let segment of snake) {
+        ctx.fillRect(segment.x, segment.y, tileSize, tileSize);
+    }
+
+    // Draw the food
+    ctx.fillStyle = 'red';
+    ctx.fillRect(food.x, food.y, tileSize, tileSize);
 }
 
-function gameOver() {
+function endGame() {
     clearInterval(gameInterval);
-    gameRunning = false;
     alert('Игра окончена!');
-    document.getElementById('startGame').disabled = false;
+    document.getElementById('startGame').style.display = 'inline';
     document.getElementById('pauseGame').style.display = 'none';
     document.getElementById('resumeGame').style.display = 'none';
 }
 
-// Управление с клавиатуры
-document.addEventListener('keydown', (e) => {
-    switch (e.key) {
-        case 'ArrowUp':
-            if (direction !== 'down') direction = 'up';
-            break;
-        case 'ArrowDown':
-            if (direction !== 'up') direction = 'down';
-            break;
-        case 'ArrowLeft':
-            if (direction !== 'right') direction = 'left';
-            break;
-        case 'ArrowRight':
-            if (direction !== 'left') direction = 'right';
-            break;
-    }
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowUp' && direction !== 'DOWN') direction = 'UP';
+    if (event.key === 'ArrowDown' && direction !== 'UP') direction = 'DOWN';
+    if (event.key === 'ArrowLeft' && direction !== 'RIGHT') direction = 'LEFT';
+    if (event.key === 'ArrowRight' && direction !== 'LEFT') direction = 'RIGHT';
 });
