@@ -1,112 +1,134 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const canvas = document.getElementById("gameCanvas");
-  const ctx = canvas.getContext("2d");
+    const gameBoard = document.getElementById("game-board");
+    const scoreDisplay = document.getElementById("score");
+    const highScoreDisplay = document.getElementById("high-score");
+    const startButton = document.getElementById("start-btn");
+    const pauseButton = document.getElementById("pause-btn");
+    const restartButton = document.getElementById("restart-btn");
 
-  const TILE_SIZE = 20;
-  const TILE_COUNT_X = canvas.width / TILE_SIZE;
-  const TILE_COUNT_Y = canvas.height / TILE_SIZE;
+    const boardSize = 20; // Размер игрового поля (20x20)
+    const initialSnake = [{ x: 10, y: 10 }];
+    const directions = { ArrowUp: { x: 0, y: -1 }, ArrowDown: { x: 0, y: 1 }, ArrowLeft: { x: -1, y: 0 }, ArrowRight: { x: 1, y: 0 } };
+    
+    let snake = [...initialSnake];
+    let food = generateFoodPosition();
+    let currentDirection = directions.ArrowRight;
+    let nextDirection = currentDirection;
+    let score = 0;
+    let highScore = 0;
+    let gameInterval;
+    let isPaused = true;
 
-  let snake = [{ x: 10, y: 10 }];
-  let direction = { x: 1, y: 0 };
-  let food = { x: 15, y: 15 };
-  let score = 0;
-  let bestScore = localStorage.getItem("bestScore") || 0;
-  let gameInterval;
-  let isPaused = false;
-
-  const updateScoreDisplay = () => {
-    document.getElementById("currentScore").innerText = `Счёт: ${score}`;
-    document.getElementById("bestScore").innerText = `Лучший счёт: ${bestScore}`;
-  };
-
-  const placeFood = () => {
-    food = {
-      x: Math.floor(Math.random() * TILE_COUNT_X),
-      y: Math.floor(Math.random() * TILE_COUNT_Y),
-    };
-    // Проверяем, чтобы еда не появлялась внутри змейки
-    if (snake.some(segment => segment.x === food.x && segment.y === food.y)) {
-      placeFood();
-    }
-  };
-
-  const drawTile = (x, y, color) => {
-    ctx.fillStyle = color;
-    ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-  };
-
-  const drawSnake = () => {
-    snake.forEach(segment => drawTile(segment.x, segment.y, "green"));
-  };
-
-  const drawFood = () => {
-    drawTile(food.x, food.y, "red");
-  };
-
-  const updateSnakePosition = () => {
-    const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
-
-    // Выход за границы — появление с противоположной стороны
-    head.x = (head.x + TILE_COUNT_X) % TILE_COUNT_X;
-    head.y = (head.y + TILE_COUNT_Y) % TILE_COUNT_Y;
-
-    if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
-      endGame();
-      return;
+    function generateFoodPosition() {
+        let position;
+        do {
+            position = {
+                x: Math.floor(Math.random() * boardSize),
+                y: Math.floor(Math.random() * boardSize),
+            };
+        } while (snake.some(segment => segment.x === position.x && segment.y === position.y));
+        return position;
     }
 
-    snake.unshift(head);
+    function draw() {
+        gameBoard.innerHTML = ""; // Очистка поля
+        snake.forEach(segment => {
+            const segmentElement = document.createElement("div");
+            segmentElement.style.gridRowStart = segment.y + 1;
+            segmentElement.style.gridColumnStart = segment.x + 1;
+            segmentElement.classList.add("snake");
+            gameBoard.appendChild(segmentElement);
+        });
 
-    if (head.x === food.x && head.y === food.y) {
-      score++;
-      if (score > bestScore) {
-        bestScore = score;
-        localStorage.setItem("bestScore", bestScore);
-      }
-      placeFood();
-    } else {
-      snake.pop();
+        const foodElement = document.createElement("div");
+        foodElement.style.gridRowStart = food.y + 1;
+        foodElement.style.gridColumnStart = food.x + 1;
+        foodElement.classList.add("food");
+        gameBoard.appendChild(foodElement);
     }
-  };
 
-  const gameLoop = () => {
-    if (isPaused) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    updateSnakePosition();
-    drawSnake();
-    drawFood();
-    updateScoreDisplay();
-  };
+    function moveSnake() {
+        const head = { x: snake[0].x + nextDirection.x, y: snake[0].y + nextDirection.y };
 
-  const startGame = () => {
-    snake = [{ x: 10, y: 10 }];
-    direction = { x: 1, y: 0 };
-    score = 0;
-    placeFood();
-    clearInterval(gameInterval);
-    gameInterval = setInterval(gameLoop, 200);
-  };
+        // Выход за границы - телепортация
+        head.x = (head.x + boardSize) % boardSize;
+        head.y = (head.y + boardSize) % boardSize;
 
-  const endGame = () => {
-    clearInterval(gameInterval);
-    alert("Игра окончена! Нажмите 'Начать', чтобы сыграть снова.");
-  };
+        if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+            endGame();
+            return;
+        }
 
-  document.addEventListener("keydown", e => {
-    if (e.key === "ArrowUp" && direction.y === 0) direction = { x: 0, y: -1 };
-    else if (e.key === "ArrowDown" && direction.y === 0) direction = { x: 0, y: 1 };
-    else if (e.key === "ArrowLeft" && direction.x === 0) direction = { x: -1, y: 0 };
-    else if (e.key === "ArrowRight" && direction.x === 0) direction = { x: 1, y: 0 };
-  });
+        snake.unshift(head);
 
-  document.getElementById("startButton").addEventListener("click", () => {
-    isPaused = false;
-    startGame();
-  });
+        if (head.x === food.x && head.y === food.y) {
+            score += 1;
+            updateScore();
+            food = generateFoodPosition();
+        } else {
+            snake.pop();
+        }
+    }
 
-  document.getElementById("pauseButton").addEventListener("click", () => {
-    isPaused = !isPaused;
-  });
+    function updateScore() {
+        scoreDisplay.textContent = `Score: ${score}`;
+        if (score > highScore) {
+            highScore = score;
+            highScoreDisplay.textContent = `High Score: ${highScore}`;
+        }
+    }
 
-  updateScoreDisplay();
+    function endGame() {
+        clearInterval(gameInterval);
+        alert(`Game Over! Final Score: ${score}`);
+        snake = [...initialSnake];
+        food = generateFoodPosition();
+        score = 0;
+        updateScore();
+        isPaused = true;
+        pauseButton.disabled = true;
+        startButton.disabled = false;
+    }
+
+    function gameLoop() {
+        moveSnake();
+        draw();
+    }
+
+    function startGame() {
+        if (!isPaused) return;
+        isPaused = false;
+        gameInterval = setInterval(gameLoop, 200);
+        startButton.disabled = true;
+        pauseButton.disabled = false;
+        restartButton.disabled = false;
+    }
+
+    function pauseGame() {
+        if (isPaused) return;
+        isPaused = true;
+        clearInterval(gameInterval);
+        startButton.disabled = false;
+    }
+
+    function restartGame() {
+        endGame();
+        startGame();
+    }
+
+    document.addEventListener("keydown", (e) => {
+        if (directions[e.key]) {
+            const newDirection = directions[e.key];
+            if (newDirection.x !== -currentDirection.x && newDirection.y !== -currentDirection.y) {
+                nextDirection = newDirection;
+            }
+        }
+    });
+
+    startButton.addEventListener("click", startGame);
+    pauseButton.addEventListener("click", pauseGame);
+    restartButton.addEventListener("click", restartGame);
+
+    draw();
+    updateScore();
 });
