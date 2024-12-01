@@ -6,11 +6,18 @@ let direction = 'RIGHT';
 let food = { x: 160, y: 160 };
 let gameInterval;
 let isPaused = false;
+let score = 0;
+let bestScore = localStorage.getItem('bestScore') ? parseInt(localStorage.getItem('bestScore')) : 0;
+
+document.getElementById('bestScore').innerText = bestScore;
 
 function startGame() {
     document.getElementById('startGame').style.display = 'none';
     document.getElementById('pauseGame').style.display = 'inline';
     document.getElementById('resumeGame').style.display = 'none';
+
+    score = 0;
+    document.getElementById('currentScore').innerText = score;
 
     gameInterval = setInterval(updateGame, 150);
 }
@@ -73,7 +80,10 @@ function checkFood() {
     if (head.x === food.x && head.y === food.y) {
         // Grow the snake
         snake.push({ ...snake[snake.length - 1] });
+        score += 10;
+        document.getElementById('currentScore').innerText = score;
         placeFood();
+        updateBestScore();
     }
 }
 
@@ -102,6 +112,14 @@ function endGame() {
     document.getElementById('startGame').style.display = 'inline';
     document.getElementById('pauseGame').style.display = 'none';
     document.getElementById('resumeGame').style.display = 'none';
+}
+
+function updateBestScore() {
+    if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem('bestScore', bestScore);
+        document.getElementById('bestScore').innerText = bestScore;
+    }
 }
 
 document.addEventListener('keydown', (event) => {
