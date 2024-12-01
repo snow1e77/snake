@@ -1,6 +1,6 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const tileSize = 20;
+let canvas = document.getElementById('gameCanvas');
+let ctx = canvas.getContext('2d');
+let tileSize = 20;
 let snake = [{ x: 100, y: 100 }];
 let direction = 'RIGHT';
 let food = { x: 160, y: 160 };
@@ -9,9 +9,10 @@ let isPaused = false;
 let score = 0;
 let bestScore = localStorage.getItem('bestScore') ? parseInt(localStorage.getItem('bestScore')) : 0;
 
-// Инициализация отображения лучшего счета
+// Обновление лучшего результата
 document.getElementById('bestScore').innerText = bestScore;
 
+// Функция для запуска игры
 function startGame() {
     document.getElementById('startGame').style.display = 'none';
     document.getElementById('pauseGame').style.display = 'inline';
@@ -32,6 +33,7 @@ function startGame() {
     gameInterval = setInterval(updateGame, 150);
 }
 
+// Функция для паузы игры
 function pauseGame() {
     isPaused = true;
     document.getElementById('pauseGame').style.display = 'none';
@@ -40,6 +42,7 @@ function pauseGame() {
     clearInterval(gameInterval);
 }
 
+// Функция для продолжения игры
 function resumeGame() {
     isPaused = false;
     document.getElementById('pauseGame').style.display = 'inline';
@@ -48,10 +51,12 @@ function resumeGame() {
     gameInterval = setInterval(updateGame, 150);
 }
 
+// Функция для перезапуска игры
 function restartGame() {
     startGame();
 }
 
+// Основная функция обновления игры
 function updateGame() {
     if (isPaused) return;
 
@@ -61,6 +66,7 @@ function updateGame() {
     drawGame();
 }
 
+// Функция движения змеи
 function moveSnake() {
     let head = { ...snake[0] };
 
@@ -79,10 +85,10 @@ function moveSnake() {
     snake.pop();
 }
 
+// Проверка столкновения с телом змеи
 function checkCollision() {
     const head = snake[0];
 
-    // Проверка столкновения с телом змеи
     for (let i = 1; i < snake.length; i++) {
         if (head.x === snake[i].x && head.y === snake[i].y) {
             endGame();
@@ -91,10 +97,10 @@ function checkCollision() {
     }
 }
 
+// Проверка поедания еды
 function checkFood() {
     const head = snake[0];
     if (head.x === food.x && head.y === food.y) {
-        // Увеличиваем змейку
         snake.push({ ...snake[snake.length - 1] });
         score += 10;
         document.getElementById('currentScore').innerText = score;
@@ -103,25 +109,26 @@ function checkFood() {
     }
 }
 
+// Функция размещения еды
 function placeFood() {
     food.x = Math.floor(Math.random() * (canvas.width / tileSize)) * tileSize;
     food.y = Math.floor(Math.random() * (canvas.height / tileSize)) * tileSize;
 }
 
+// Функция отрисовки игры
 function drawGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Отображаем змейку
     ctx.fillStyle = 'green';
     for (let segment of snake) {
         ctx.fillRect(segment.x, segment.y, tileSize, tileSize);
     }
 
-    // Отображаем еду
     ctx.fillStyle = 'red';
     ctx.fillRect(food.x, food.y, tileSize, tileSize);
 }
 
+// Функция окончания игры
 function endGame() {
     clearInterval(gameInterval);
     alert('Игра окончена!');
@@ -130,13 +137,13 @@ function endGame() {
     document.getElementById('resumeGame').style.display = 'none';
     document.getElementById('restartGame').style.display = 'none';
 
-    // Сброс состояния игры
     snake = [{ x: 100, y: 100 }];
     direction = 'RIGHT';
     score = 0;
     document.getElementById('currentScore').innerText = score;
 }
 
+// Обновление лучшего результата
 function updateBestScore() {
     if (score > bestScore) {
         bestScore = score;
