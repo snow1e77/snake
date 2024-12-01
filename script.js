@@ -1,6 +1,6 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-const startButton = document.getElementById('startGameButton');
+const startButton = document.getElementById('startButton');
 const pauseButton = document.getElementById('pauseButton');
 const restartButton = document.getElementById('restartButton');
 const scoreDisplay = document.getElementById('score');
@@ -9,18 +9,16 @@ let gameInterval;
 let isGameRunning = false;
 let isGamePaused = false;
 let score = 0;
-
-const game = {
-    snake: [{ x: 160, y: 160 }],
-    direction: 'right',
-    food: { x: 80, y: 80 },
-    speed: 200,
-};
+let snake = [{ x: 160, y: 160 }];
+let direction = 'right';
+let food = { x: 80, y: 80 };
+const snakeSize = 20;
+const canvasSize = 400;
 
 function startGame() {
     if (!isGameRunning) {
         resetGame();
-        gameInterval = setInterval(updateGame, game.speed);
+        gameInterval = setInterval(updateGame, 150);
         isGameRunning = true;
         startButton.disabled = true;
         pauseButton.disabled = false;
@@ -45,9 +43,9 @@ function restartGame() {
 }
 
 function resetGame() {
-    game.snake = [{ x: 160, y: 160 }];
-    game.direction = 'right';
-    game.food = { x: 80, y: 80 };
+    snake = [{ x: 160, y: 160 }];
+    direction = 'right';
+    food = { x: 80, y: 80 };
     score = 0;
     scoreDisplay.textContent = 'Счет: 0';
     isGameRunning = false;
@@ -64,28 +62,29 @@ function updateGame() {
 }
 
 function moveSnake() {
-    let head = { ...game.snake[0] };
+    let head = { ...snake[0] };
 
-    switch (game.direction) {
-        case 'up': head.y -= 20; break;
-        case 'down': head.y += 20; break;
-        case 'left': head.x -= 20; break;
-        case 'right': head.x += 20; break;
+    switch (direction) {
+        case 'up': head.y -= snakeSize; break;
+        case 'down': head.y += snakeSize; break;
+        case 'left': head.x -= snakeSize; break;
+        case 'right': head.x += snakeSize; break;
     }
 
-    if (head.x < 0) head.x = canvas.width - 20;
-    if (head.y < 0) head.y = canvas.height - 20;
-    if (head.x >= canvas.width) head.x = 0;
-    if (head.y >= canvas.height) head.y = 0;
+    // Убедимся, что змейка выходит с противоположной стороны при касании границы
+    if (head.x < 0) head.x = canvasSize - snakeSize;
+    if (head.y < 0) head.y = canvasSize - snakeSize;
+    if (head.x >= canvasSize) head.x = 0;
+    if (head.y >= canvasSize) head.y = 0;
 
-    game.snake.unshift(head);
-    game.snake.pop();
+    snake.unshift(head);
+    snake.pop();
 }
 
 function checkCollision() {
-    const head = game.snake[0];
-    for (let i = 1; i < game.snake.length; i++) {
-        if (head.x === game.snake[i].x && head.y === game.snake[i].y) {
+    const head = snake[0];
+    for (let i = 1; i < snake.length; i++) {
+        if (head.x === snake[i].x && head.y === snake[i].y) {
             clearInterval(gameInterval);
             isGameRunning = false;
             alert('Игра окончена! Ваш счет: ' + score);
@@ -98,40 +97,40 @@ function checkCollision() {
 }
 
 function checkFood() {
-    const head = game.snake[0];
-    if (head.x === game.food.x && head.y === game.food.y) {
+    const head = snake[0];
+    if (head.x === food.x && head.y === food.y) {
         score += 10;
         scoreDisplay.textContent = 'Счет: ' + score;
-        game.snake.push({});
+        snake.push({});
         placeFood();
     }
 }
 
 function placeFood() {
-    const x = Math.floor(Math.random() * (canvas.width / 20)) * 20;
-    const y = Math.floor(Math.random() * (canvas.height / 20)) * 20;
-    game.food = { x, y };
+    const x = Math.floor(Math.random() * (canvasSize / snakeSize)) * snakeSize;
+    const y = Math.floor(Math.random() * (canvasSize / snakeSize)) * snakeSize;
+    food = { x, y };
 }
 
 function drawGame() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvasSize, canvasSize);
 
     ctx.fillStyle = 'green';
-    game.snake.forEach(part => {
-        ctx.fillRect(part.x, part.y, 20, 20);
+    snake.forEach(part => {
+        ctx.fillRect(part.x, part.y, snakeSize, snakeSize);
     });
 
     ctx.fillStyle = 'red';
-    ctx.fillRect(game.food.x, game.food.y, 20, 20);
+    ctx.fillRect(food.x, food.y, snakeSize, snakeSize);
 }
 
 document.addEventListener('keydown', (e) => {
     if (!isGameRunning) return;
 
     switch (e.key) {
-        case 'ArrowUp': if (game.direction !== 'down') game.direction = 'up'; break;
-        case 'ArrowDown': if (game.direction !== 'up') game.direction = 'down'; break;
-        case 'ArrowLeft': if (game.direction !== 'right') game.direction = 'left'; break;
-        case 'ArrowRight': if (game.direction !== 'left') game.direction = 'right'; break;
+        case 'ArrowUp': if (direction !== 'down') direction = 'up'; break;
+        case 'ArrowDown': if (direction !== 'up') direction = 'down'; break;
+        case 'ArrowLeft': if (direction !== 'right') direction = 'left'; break;
+        case 'ArrowRight': if (direction !== 'left') direction = 'right'; break;
     }
 });
