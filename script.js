@@ -16,8 +16,12 @@ function startGame() {
     document.getElementById('pauseGame').style.display = 'inline';
     document.getElementById('resumeGame').style.display = 'none';
 
+    // Reset game state
+    snake = [{ x: 100, y: 100 }];
+    direction = 'RIGHT';
     score = 0;
     document.getElementById('currentScore').innerText = score;
+    placeFood();
 
     gameInterval = setInterval(updateGame, 150);
 }
@@ -112,6 +116,9 @@ function endGame() {
     document.getElementById('startGame').style.display = 'inline';
     document.getElementById('pauseGame').style.display = 'none';
     document.getElementById('resumeGame').style.display = 'none';
+    snake = [{ x: 100, y: 100 }];
+    score = 0;
+    document.getElementById('currentScore').innerText = score;
 }
 
 function updateBestScore() {
