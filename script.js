@@ -13,6 +13,7 @@ let isPaused = false;
 const startBtn = document.getElementById('startBtn');
 const pauseBtn = document.getElementById('pauseBtn');
 const resumeBtn = document.getElementById('resumeBtn');
+const restartBtn = document.getElementById('restartBtn');
 const currentScoreEl = document.getElementById('currentScore');
 const highScoreEl = document.getElementById('highScore');
 
@@ -25,6 +26,7 @@ document.addEventListener('keydown', changeDirection);
 startBtn.addEventListener('click', startGame);
 pauseBtn.addEventListener('click', pauseGame);
 resumeBtn.addEventListener('click', resumeGame);
+restartBtn.addEventListener('click', restartGame);
 
 // Game functions
 function startGame() {
@@ -36,6 +38,7 @@ function startGame() {
     gameInterval = setInterval(updateGame, 150);
     startBtn.disabled = true;
     pauseBtn.disabled = false;
+    restartBtn.style.display = 'none';
 }
 
 function updateGame() {
@@ -102,6 +105,7 @@ function pauseGame() {
     isPaused = true;
     pauseBtn.disabled = true;
     resumeBtn.style.display = 'inline-block';
+    restartBtn.style.display = 'inline-block';
 }
 
 function resumeGame() {
@@ -111,10 +115,20 @@ function resumeGame() {
     pauseBtn.disabled = false;
 }
 
+function restartGame() {
+    clearInterval(gameInterval);
+    startGame();
+    isPaused = false;
+    pauseBtn.disabled = false;
+    resumeBtn.style.display = 'none';
+    restartBtn.style.display = 'none';
+}
+
 function endGame() {
     clearInterval(gameInterval);
     alert('Игра окончена! Ваш счёт: ' + score);
     startBtn.disabled = false;
     pauseBtn.disabled = true;
     resumeBtn.style.display = 'none';
+    restartBtn.style.display = 'inline-block';
 }
