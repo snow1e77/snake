@@ -6,14 +6,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const pauseButton = document.getElementById("pause-btn");
     const restartButton = document.getElementById("restart-btn");
 
-    const boardSize = 20; // Размер игрового поля (20x20)
+    const boardSize = 20; // Размер игрового поля
     const initialSnake = [{ x: 10, y: 10 }];
     const directions = { ArrowUp: { x: 0, y: -1 }, ArrowDown: { x: 0, y: 1 }, ArrowLeft: { x: -1, y: 0 }, ArrowRight: { x: 1, y: 0 } };
-    
+
     let snake = [...initialSnake];
     let food = generateFoodPosition();
-    let currentDirection = directions.ArrowRight;
-    let nextDirection = currentDirection;
+    let currentDirection = null; // Изменено: Змейка не двигается вначале
+    let nextDirection = null;
     let score = 0;
     let highScore = 0;
     let gameInterval;
@@ -48,7 +48,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function moveSnake() {
-        const head = { x: snake[0].x + nextDirection.x, y: snake[0].y + nextDirection.y };
+        if (!currentDirection) return; // Змейка не двигается без направления
+
+        const head = { x: snake[0].x + currentDirection.x, y: snake[0].y + currentDirection.y };
 
         // Выход за границы - телепортация
         head.x = (head.x + boardSize) % boardSize;
@@ -88,6 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
         isPaused = true;
         pauseButton.disabled = true;
         startButton.disabled = false;
+        currentDirection = null; // Сброс направления
     }
 
     function gameLoop() {
@@ -98,6 +101,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function startGame() {
         if (!isPaused) return;
         isPaused = false;
+        nextDirection = directions.ArrowRight; // Начальное направление
+        currentDirection = nextDirection;
         gameInterval = setInterval(gameLoop, 200);
         startButton.disabled = true;
         pauseButton.disabled = false;
@@ -119,8 +124,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("keydown", (e) => {
         if (directions[e.key]) {
             const newDirection = directions[e.key];
-            if (newDirection.x !== -currentDirection.x && newDirection.y !== -currentDirection.y) {
+            if (!currentDirection || (newDirection.x !== -currentDirection.x && newDirection.y !== -currentDirection.y)) {
                 nextDirection = newDirection;
+                currentDirection = nextDirection;
             }
         }
     });
