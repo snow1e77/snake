@@ -9,13 +9,14 @@ let isPaused = false;
 let score = 0;
 let bestScore = localStorage.getItem('bestScore') ? parseInt(localStorage.getItem('bestScore')) : 0;
 
-// Обновляем отображение лучшего счета
+// Инициализация отображения лучшего счета
 document.getElementById('bestScore').innerText = bestScore;
 
 function startGame() {
     document.getElementById('startGame').style.display = 'none';
     document.getElementById('pauseGame').style.display = 'inline';
     document.getElementById('resumeGame').style.display = 'none';
+    document.getElementById('restartGame').style.display = 'none';
 
     // Сброс состояния игры
     snake = [{ x: 100, y: 100 }];
@@ -35,6 +36,7 @@ function pauseGame() {
     isPaused = true;
     document.getElementById('pauseGame').style.display = 'none';
     document.getElementById('resumeGame').style.display = 'inline';
+    document.getElementById('restartGame').style.display = 'inline';
     clearInterval(gameInterval);
 }
 
@@ -42,7 +44,12 @@ function resumeGame() {
     isPaused = false;
     document.getElementById('pauseGame').style.display = 'inline';
     document.getElementById('resumeGame').style.display = 'none';
+    document.getElementById('restartGame').style.display = 'none';
     gameInterval = setInterval(updateGame, 150);
+}
+
+function restartGame() {
+    startGame();
 }
 
 function updateGame() {
@@ -121,6 +128,7 @@ function endGame() {
     document.getElementById('startGame').style.display = 'inline';
     document.getElementById('pauseGame').style.display = 'none';
     document.getElementById('resumeGame').style.display = 'none';
+    document.getElementById('restartGame').style.display = 'none';
 
     // Сброс состояния игры
     snake = [{ x: 100, y: 100 }];
