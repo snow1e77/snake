@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let gamePaused = false;
     let score = 0;
 
-    // Функция начала игры
     function startGame() {
         snake = [{ x: 50, y: 50 }];
         direction = 'RIGHT';
@@ -29,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
         resumeBtn.style.display = 'none';
     }
 
-    // Функция обновления игры
     function updateGame() {
         if (gamePaused) return;
         moveSnake();
@@ -37,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
         drawGame();
     }
 
-    // Функция движения змейки
     function moveSnake() {
         const head = { ...snake[0] };
         if (direction === 'RIGHT') head.x += 20;
@@ -45,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (direction === 'UP') head.y -= 20;
         if (direction === 'DOWN') head.y += 20;
 
-        // Проверка на столкновение с границами
+        // Проверка на столкновение с границами (выход с противоположной стороны)
         if (head.x < 0) head.x = canvas.width - 20;
         if (head.x >= canvas.width) head.x = 0;
         if (head.y < 0) head.y = canvas.height - 20;
@@ -61,14 +58,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Генерация еды
     function generateFood() {
         const x = Math.floor(Math.random() * canvas.width / 20) * 20;
         const y = Math.floor(Math.random() * canvas.height / 20) * 20;
         food = { x, y };
     }
 
-    // Проверка на столкновение
     function checkCollisions() {
         const head = snake[0];
         for (let i = 1; i < snake.length; i++) {
@@ -81,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Отрисовка игры
     function drawGame() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = 'green';
@@ -92,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fillRect(food.x, food.y, 20, 20);
     }
 
-    // Слушатели событий
     startBtn.addEventListener('click', startGame);
     pauseBtn.addEventListener('click', () => {
         clearInterval(gameInterval);
