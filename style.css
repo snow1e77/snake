@@ -2,26 +2,27 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
+    height: 100vh;
+    margin: 0;
     font-family: Arial, sans-serif;
 }
 
-#game-container {
+.game-container {
     text-align: center;
 }
 
-canvas {
+#gameCanvas {
     border: 2px solid black;
     margin-bottom: 10px;
 }
 
-button {
+.controls button {
     margin: 5px;
     padding: 10px 20px;
+    font-size: 16px;
     cursor: pointer;
 }
 
-#score {
-    font-size: 1.2em;
+.score-board {
     margin-top: 10px;
 }
