@@ -4,19 +4,12 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    font-family: 'Arial', sans-serif;
 }
 
-#gameContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-canvas {
-    border: 3px solid #333;
-    background-color: #e0e0e0;
+#game-container {
+    position: relative;
+    text-align: center;
 }
 
 #controls {
