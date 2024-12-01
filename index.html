@@ -3,16 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игра Змейка</title>
+    <title>Змейка</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
-        <button id="startButton">Начать игру</button>
-        <button id="pauseButton" style="display: none;">Пауза</button>
-        <button id="resumeButton" style="display: none;">Продолжить</button>
-        <p id="score">Счёт: 0</p>
+    <div class="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div class="controls">
+            <button id="startBtn">Начать игру</button>
+            <button id="pauseBtn" disabled>Пауза</button>
+            <button id="resumeBtn" style="display: none;">Продолжить</button>
+        </div>
+        <div class="score-board">
+            <p>Текущий счёт: <span id="currentScore">0</span></p>
+            <p>Лучший счёт: <span id="highScore">0</span></p>
+        </div>
     </div>
     <script src="script.js"></script>
 </body>
