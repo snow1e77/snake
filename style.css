@@ -2,33 +2,26 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
-    font-family: 'Arial', sans-serif;
-    background-color: #f0f0f0;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
 }
 
 #game-container {
-    position: relative;
     text-align: center;
-    border: 5px solid #333;
-    padding: 20px;
-    background-color: #fff;
 }
 
 canvas {
     border: 2px solid black;
-    display: block;
-    margin: 0 auto;
-}
-
-#controls {
-    text-align: center;
-    margin-top: 20px;
+    margin-bottom: 10px;
 }
 
 button {
     margin: 5px;
     padding: 10px 20px;
-    font-size: 16px;
+    cursor: pointer;
+}
+
+#score {
+    font-size: 1.2em;
+    margin-top: 10px;
 }
