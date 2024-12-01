@@ -1,79 +1,106 @@
-// Инициализация переменных
-let canvas = document.getElementById('gameCanvas');
-let ctx = canvas.getContext('2d');
-let snake = [{ x: 150, y: 150 }];
-let food = { x: 100, y: 100 };
-let direction = 'RIGHT';
-let newDirection = 'RIGHT';
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const startButton = document.getElementById('startButton');
+const pauseButton = document.getElementById('pauseButton');
+const resumeButton = document.getElementById('resumeButton');
+const scoreElement = document.getElementById('score');
+
+let snake;
+let food;
 let gameInterval;
+let isPaused = false;
+let score = 0;
+let direction;
 let gameRunning = false;
 
-// Обработка нажатий клавиш для смены направления
-document.addEventListener('keydown', (e) => {
-    switch (e.key) {
-        case 'ArrowUp':
-            if (direction !== 'DOWN') newDirection = 'UP';
-            break;
-        case 'ArrowDown':
-            if (direction !== 'UP') newDirection = 'DOWN';
-            break;
-        case 'ArrowLeft':
-            if (direction !== 'RIGHT') newDirection = 'LEFT';
-            break;
-        case 'ArrowRight':
-            if (direction !== 'LEFT') newDirection = 'RIGHT';
-            break;
-    }
-});
-
-// Функция для начала игры
 function startGame() {
     if (!gameRunning) {
         gameRunning = true;
-        direction = newDirection;
+        score = 0;
+        snake = [
+            { x: 150, y: 150 },
+            { x: 140, y: 150 },
+            { x: 130, y: 150 },
+        ];
+        direction = 'right';
+        document.addEventListener('keydown', changeDirection);
+        generateFood();
+        startButton.style.display = 'none';
+        pauseButton.style.display = 'inline-block';
+        resumeButton.style.display = 'none';
         gameInterval = setInterval(updateGame, 100);
+        updateScore();
     }
 }
 
-// Функция для обновления игры
-function updateGame() {
-    direction = newDirection;
-    let head = { ...snake[0] };
+function pauseGame() {
+    if (gameRunning) {
+        clearInterval(gameInterval);
+        isPaused = true;
+        pauseButton.style.display = 'none';
+        resumeButton.style.display = 'inline-block';
+    }
+}
 
-    // Изменение позиции головы змейки в зависимости от направления
+function resumeGame() {
+    if (isPaused) {
+        isPaused = false;
+        gameInterval = setInterval(updateGame, 100);
+        pauseButton.style.display = 'inline-block';
+        resumeButton.style.display = 'none';
+    }
+}
+
+function changeDirection(event) {
+    if (event.key === 'ArrowUp' && direction !== 'down') direction = 'up';
+    if (event.key === 'ArrowDown' && direction !== 'up') direction = 'down';
+    if (event.key === 'ArrowLeft' && direction !== 'right') direction = 'left';
+    if (event.key === 'ArrowRight' && direction !== 'left') direction = 'right';
+}
+
+function updateGame() {
+    if (isPaused) return;
+
+    let newHead = { ...snake[0] };
+
     switch (direction) {
-        case 'UP':
-            head.y -= 20;
+        case 'up':
+            newHead.y -= 10;
             break;
-        case 'DOWN':
-            head.y += 20;
+        case 'down':
+            newHead.y += 10;
             break;
-        case 'LEFT':
-            head.x -= 20;
+        case 'left':
+            newHead.x -= 10;
             break;
-        case 'RIGHT':
-            head.x += 20;
+        case 'right':
+            newHead.x += 10;
             break;
     }
 
-    // Проверка выхода за границы и возвращение с противоположной стороны
-    if (head.x < 0) head.x = canvas.width - 20;
-    if (head.y < 0) head.y = canvas.height - 20;
-    if (head.x >= canvas.width) head.x = 0;
-    if (head.y >= canvas.height) head.y = 0;
-
-    // Проверка столкновения с самим собой
-    if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
-        gameOver();
+    // Check for collision with walls
+    if (
+        newHead.x < 0 || newHead.x >= canvas.width ||
+        newHead.y < 0 || newHead.y >= canvas.height
+    ) {
+        endGame();
         return;
     }
 
-    // Добавление нового сегмента в змейку
-    snake.unshift(head);
+    // Check for collision with itself
+    for (let i = 1; i < snake.length; i++) {
+        if (newHead.x === snake[i].x && newHead.y === snake[i].y) {
+            endGame();
+            return;
+        }
+    }
 
-    // Проверка, съела ли змейка еду
-    if (head.x === food.x && head.y === food.y) {
-        placeNewFood();
+    snake.unshift(newHead);
+
+    if (newHead.x === food.x && newHead.y === food.y) {
+        score += 10;
+        updateScore();
+        generateFood();
     } else {
         snake.pop();
     }
@@ -81,34 +108,48 @@ function updateGame() {
     drawGame();
 }
 
-// Функция для отрисовки игры
 function drawGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Отрисовка змейки
+    // Draw snake
     ctx.fillStyle = 'green';
-    snake.forEach(segment => {
-        ctx.fillRect(segment.x, segment.y, 20, 20);
-    });
+    for (let segment of snake) {
+        ctx.fillRect(segment.x, segment.y, 10, 10);
+    }
 
-    // Отрисовка еды
+    // Draw food
     ctx.fillStyle = 'red';
-    ctx.fillRect(food.x, food.y, 20, 20);
+    ctx.fillRect(food.x, food.y, 10, 10);
 }
 
-// Функция для размещения еды в случайной позиции
-function placeNewFood() {
-    let x = Math.floor(Math.random() * (canvas.width / 20)) * 20;
-    let y = Math.floor(Math.random() * (canvas.height / 20)) * 20;
+function generateFood() {
+    const x = Math.floor(Math.random() * (canvas.width / 10)) * 10;
+    const y = Math.floor(Math.random() * (canvas.height / 10)) * 10;
+
+    // Ensure food does not appear on the snake
+    for (let segment of snake) {
+        if (segment.x === x && segment.y === y) {
+            return generateFood();
+        }
+    }
+
     food = { x, y };
 }
 
-// Функция окончания игры
-function gameOver() {
-    clearInterval(gameInterval);
-    gameRunning = false;
-    alert('Игра окончена! Ваш результат: ' + snake.length);
+function updateScore() {
+    scoreElement.textContent = `Счёт: ${score}`;
 }
 
-// Запуск игры при нажатии кнопки
-document.getElementById('startButton').addEventListener('click', startGame);
+function endGame() {
+    clearInterval(gameInterval);
+    alert('Игра окончена! Ваш счёт: ' + score);
+    startButton.style.display = 'inline-block';
+    pauseButton.style.display = 'none';
+    resumeButton.style.display = 'none';
+    gameRunning = false;
+}
+
+// Add event listener for start button
+startButton.addEventListener('click', startGame);
+pauseButton.addEventListener('click', pauseGame);
+resumeButton.addEventListener('click', resumeGame);
